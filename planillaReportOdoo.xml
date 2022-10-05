@@ -1,0 +1,35 @@
+<odoo>
+    <data>
+        
+        <template id="report_idempiere">
+           <t t-call ="web.html_container">
+             <t t-foreach ="docs" t-as ="d">
+                <t t-call ="web.external_layout">
+                 <div class="page">
+                     <h2>Formulario Idempiere</h2>
+                     <table class="table table-bordered">
+                         <thead>
+                             <tr>
+                                 <th scope="col">Dato</th>
+                                 <th scope="col">Valor</th>
+                             </tr>
+                         </thead>
+                         <tbody>
+                             <tr class="table-success">
+                                 <th scope="row">Nombre</th>
+                                 <td><span t-field="d.name"/></td>
+                             </tr>
+                            <tr class="table-success">
+                                 <th scope="row">Referencia</th>
+                                 <td><span t-field="d.referencia"/></td>
+                             </tr>
+                         </tbody>
+                     </table>
+                 </div>
+                </t>
+             </t>
+           </t> 
+        </template>
+
+    </data>
+</odoo>
