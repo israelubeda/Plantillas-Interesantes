@@ -1,0 +1,231 @@
+Odoo se basa en una arquitectura cliente / servidor. El servidor y los clientes se comunican mediante el protocolo XML-RPC. XML-RPC es un protocolo muy simple que permite al cliente realizar llamadas a procedimientos remotos. La función llamada, sus argumentos y el resultado de la llamada se transportan mediante HTTP y se codifican mediante XML. Para obtener más información sobre XML-RPC en Odoo , consulte: https://www.odoo.com/documentation/13.0/developer/misc/api/odoo.html.
+
+Ejemplo: Decirnos si la conexión es correcta
+
+#import xmlrpclib
+import xmlrpc.client as xmlrpc # esta libreria ya viene por defecto instalada en Odoo 13
+srv, db = 'http://localhost:8069', 'miodoo'
+user, pwd = 'admin', 'admin'
+common = client.ServerProxy('%s/xmlrpc/2/common' % srv)
+common.version()
+uid = common.authenticate(db, user, pwd, {})
+print (uid)
+
+Ejemplo: Servidores funcionando con SSL
+
+import xmlrpc.client as client
+import ssl
+dbname = "miodoo"
+username = "admin"
+pwd = "admin"
+url = "http://192.168.47.148"
+sock_common = client.ServerProxy('{}/xmlrpc/common'.format(url),context=gcontext)
+sock_common.version()
+uid = sock_common.authenticate(db, user, pwd, {})
+print (uid)
+
+Ejemplo: Contar clientes
+
+import xmlrpc.client as client
+import ssl
+dbname = "miodoo"
+username = "admin"
+pwd = "admin"
+url = "http://192.168.47.148:8069"
+gcontext = ssl._create_unverified_context()
+sock_common = client.ServerProxy('{}/xmlrpc/common'.format(url),context=gcontext)
+uid = sock_common.login(dbname,username,pwd)
+sock = client.ServerProxy('{}/xmlrpc/object'.format(url),context=gcontext)
+resultado = sock.execute_kw(dbname, uid, pwd, 'res.partner', 'search_count', [[]])
+print(resultado)
+ 
+
+Ejemplo: Crear un partner y su dirección
+
+#import xmlrpclib
+import xmlrpc.client as xmlrpc # esta libreria ya viene por defecto instalada en Odoo 13
+
+username = 'admin'      #the user
+pwd          = 'admin'      #the password of the user
+dbname    = 'terp'         #the database
+
+# Get the uid
+sock_common = xmlrpc.ServerProxy ('http://localhost:8069/xmlrpc/common')
+uid                   = sock_common.login(dbname, username, pwd)
+
+#replace localhost with the address of the server
+sock = xmlrpc.ServerProxy('http://localhost:8069/xmlrpc/object')
+
+partner = {
+   'name': 'Fabien Pinckaers',
+   'lang': 'es_ES',
+}
+
+partner_id = sock.execute(dbname, uid, pwd, 'res.partner', 'create', partner)
+
+values = {
+   'phone': 123456,
+   'street': 'del pez s/n',
+}
+
+result = sock.execute(dbname, uid, pwd, 'res.partner', 'write', partner_id, values)
+
+Ejemplo: Crear un contacto al anterior Partner
+
+contacto = {
+   'name': 'Contacto 10',
+   'lang': 'es_ES',
+   'parent_id': partner_id,
+   'tz':'Europe/Brussels',
+   'email':'contacto10@gmail.com',
+   'active':'true',
+   'phone':33333,
+   'type':'contact',
+   'customer_rank':1,
+}
+
+contact_id = sock.execute(dbname, uid, pwd, 'res.partner', 'create', contacto)
+
+
+Ejemplo: Buscar un partner
+
+args = [('vat', '=', 'ZZZZZZ')] #query clause
+ids = sock.execute(dbname, uid, pwd, 'res.partner', 'search', args)
+
+Ejemplo: Leer datos del Partner
+
+fields = ['name', 'active', 'vat', 'ref'] #fields to read
+data = sock.execute(dbname, uid, pwd, 'res.partner', 'read', ids, fields) #ids is a list of id
+Ejemplo: Actualizar datos del partner
+
+values = {'vat': 'ZZ1ZZZ'} #data to update
+result = sock.execute(dbname, uid, pwd, 'res.partner', 'write', ids, values)
+
+Ejemplo: Borrar Partner
+
+# ids : list of id
+result = sock.execute(dbname, uid, pwd, 'res.partner', 'unlink', ids)
+
+Adjuntar un fichero a un res.partner 
+
+fichero = open("maria.jpg",'rb')
+file_name = "maria.jpg"
+attachment_data = base64.b64encode(fichero.read()).decode('ascii')
+vals_attachment = {
+                'res_model': 'account.invoice',
+                'res_id': 10,
+                'type': 'binary',
+                'mimetype': 'application/octet-stream',
+                'company_id': 1, #company ID
+                'datas': attachment_data,
+                'name': file_name,
+                'datas_fname': file_name,
+                'res_name': file_name,
+                'indext_content': 'application',
+                }
+attachment_id = sock.execute(dbname,uid,pwd,'ir.attachment','create',vals_attachment)
+fichero.close()
+Crear contacto  vinculado a una empresa con acceso al Portal
+miemail = 'contacto16@gmail.com'
+
+miparent_id = 43 # ID del partner (empresa que tiene esos contactos)
+
+contacto = {
+    'name': 'Contacto 16',
+    'lang': 'es_ES',
+    'parent_id': miparent_id,
+    'tz':'Europe/Brussels',
+    'email':miemail,
+    'active':'true',
+    'phone':33333,
+    'type':'contact',
+    'customer_rank':1,
+}
+
+contact_id = sock.execute(dbname, uid, pwd, 'res.partner', 'create', contacto)
+
+#Creamos el usuario
+usuario = {
+   'partner_id': contact_id,
+   'email': miemail,
+   'company_id':1,
+   'login': miemail,
+   'groups_id':[(6,  0,  [8])],
+   'share':'true',
+ }
+
+user_id = sock.execute(dbname, uid, pwd, 'res.users', 'create', usuario)
+Cambiar la clave del administrador
+
+args = [('login', '=', 'admin')] #query clause
+
+partner_id = sock.execute(dbname, uid, pwd, 'res.users', 'search', args) values = {'password': '1234'} #data to update
+
+result = sock.execute(dbname, uid, pwd, 'res.users', 'write', partner_id, values)
+
+ Crear Productos
+
+        producto = {
+                'name': 'patatas',
+                'active': True,
+                'default_code': 1234,
+                'taxes_id': [(6, 0, [37])],     # 4% IVA por defecto es 21%
+                'supplier_taxes_id': [(6, 0, [28])],   # 4% IVA 
+        }
+           
+       product_id = sock.execute(dbname, uid, pwd, 'product.product', 'create', producto)
+
+Asignarlos a una categoria
+
+vals = {
+            'description': 'patatas'],
+             'type': 'product',      # puede ser service
+             'categ_id': 1,           # puede ser service
+             'list_price': 10.20,
+            }
+resultado = sock.execute(dbname, uid, pwd, 'product.template', 'write',product_id,vals)
+
+Crear apuntes contables
+
+# Crea el asiento
+je_id = sock.execute_kw(dbname, uid, pwd, 'account.move', 'create',[{'name': "Python Journal Entry 4", 'date': '2022-03-10', 'journal_id': 3, 'ref': 'hola'}])
+
+# Create los apuntes
+l1 = sock.execute_kw(dbname, uid, pwd, 'account.move.line', 'create',
+                  [{
+                  'move_id': je_id, 
+                  'account_id': 342, #Receivables
+                  'debit' : 120.00
+                   }],{'context' :{'check_move_validity': False}})
+
+
+l2 = sock.execute_kw(dbname, uid, pwd, 'account.move.line', 'create', 
+                    [{'move_id': je_id, 
+                    'account_id': 340, #Revenue
+                    'credit' : 100.00
+                   }],{'context' :{'check_move_validity': False}})
+
+l3 = sock.execute_kw(dbname, uid, pwd, 'account.move.line', 'create', 
+                    [{'move_id': je_id, 
+                    'account_id': 340, #Tax
+                    'credit' : 20.00
+                   }],{'context' :{'check_move_validity': True}})
+
+Enviar un email
+
+oMail = {
+              'email_to': 'pepe@pepe.com',
+              'subject': 'saludos',
+              'body_html': 'Hola',
+}
+
+ mail_id = sock.execute(database, uid, pwd, 'mail.mail', 'create', oMail)
+
+try:
+     result = sock.execute(database, uid, pwd, 'mail.mail', 'send', mail_id)
+except:
+     pass
+
+Nota:
+- asegurate de tener configurado el servidor de correo saliente
+- Da un error al no estar permitido los None. Por eso lo capturamos con el Try/except pero el mail sale.
