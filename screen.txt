@@ -1,0 +1,6 @@
+Después de conectarse, ejecute screen . Esto iniciará otro Shell que se ejecuta dentro de la pantalla. Ejecute su comando, luego haga un Ctrl - a d .
+
+Esto le "desconectará" de la sesión de pantalla. En este momento, puedes cerrar la sesión o hacer cualquier otra cosa que desees.
+
+Cuando quiera volver a conectarse a la sesión de pantalla, sólo tiene que ejecutar screen -RD desde el prompt Shell (como el mismo usuario que creó la sesión).
+
