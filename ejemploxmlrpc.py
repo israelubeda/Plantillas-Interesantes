@@ -5,7 +5,7 @@ import ssl
 
 url = 'https://aquivalaurl.dev.odoo.com'
 db = 'acopen-rut2-6050630'
-username = 'admin@acomin.cl'
+username = 'correo@correo.cl'
 password = 'pass de api'
 
 gcontext = ssl._create_unverified_context()
