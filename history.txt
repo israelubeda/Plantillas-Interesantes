@@ -1,0 +1,14 @@
+para ver el historial
+
+nano ~/.bash_history
+
+
+Si deseas ejecutar un comando específico utilizando el número correspondiente en el historial de comandos en Linux, puedes utilizar el comando ! seguido del número del comando en el historial. En tu caso, si quieres ejecutar el comando número 2000, puedes hacerlo de la siguiente manera:
+
+!2000
+
+Para borrar un comando de history
+
+history -d NUMERO
+
+
